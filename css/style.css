@@ -1,0 +1,117 @@
+/* 字体声明 - Google Fonts 通过 <link> 加载 */
+/* 本地字体预留（后续替换） */
+/* @font-face { font-family: 'zpix'; src: url('../assets/fonts/zpix.woff2') format('woff2'); } */
+/* @font-face { font-family: 'Xiaowanzi'; src: url('../assets/fonts/xiaowanzi.woff2') format('woff2'); } */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+/* 底层：世界纹理背景 */
+#bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: url('../assets/textures/world-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* 中层：Three.js Canvas */
+#canvas-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+#canvas-container canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 顶层：UI 预留 */
+#ui-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* 常驻 FIX 标签：屏幕底部中央 */
+#fix-label {
+  position: absolute;
+  bottom: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Courier New', monospace;
+  font-weight: 300;
+  font-size: 1.2rem;
+  color: rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* FIX 全屏覆盖层 */
+#fix-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+#fix-overlay.active {
+  display: flex;
+}
+
+#fix-noise {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.2;
+}
+
+#fix-text {
+  position: relative;
+  font-family: 'Impact', sans-serif;
+  font-size: 50vw;
+  color: #fff;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  animation: fixFlicker 0.1s infinite alternate;
+}
+
+@keyframes fixFlicker {
+  0% { opacity: 1; }
+  25% { opacity: 0.3; }
+  50% { opacity: 1; }
+  75% { opacity: 0.5; }
+  100% { opacity: 0.85; }
+}
+
+#fix-text::before,
+#fix-text::after {
+  content: 'FIX';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.6);
+}

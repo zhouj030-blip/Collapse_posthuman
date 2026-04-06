@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collapse · 崩塌</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Annie+Use+Your+Telescope&family=Indie+Flower&family=JetBrains+Mono&family=Press+Start+2P&family=Source+Code+Pro&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.172.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.172.0/examples/jsm/",
+      "@tweenjs/tween.js": "https://unpkg.com/@tweenjs/tween.js@25.0.0/dist/tween.esm.js"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <!-- 底层：世界纹理背景 -->
+  <div id="bg-layer"></div>
+
+  <!-- 中层：Three.js 透明 Canvas -->
+  <div id="canvas-container"></div>
+
+  <!-- 顶层：UI 预留（文字输入等） -->
+  <div id="ui-layer">
+    <div id="fix-label">FIX</div>
+  </div>
+
+  <!-- FIX 全屏覆盖层 -->
+  <div id="fix-overlay">
+    <canvas id="fix-noise"></canvas>
+    <div id="fix-text">FIX</div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor
+.vscode/
+.idea/
+
+# Claude Code
+.claude/
+
+# Unused textures (already removed from code)
+assets/textures/BoxTexture1.png
+assets/textures/BoxTexture2.png
