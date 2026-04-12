@@ -4,9 +4,10 @@
 import * as TWEEN from '@tweenjs/tween.js';
 import { initScene } from './scene.js';
 import { initCamera, setupZoom, updateZoom, onResize } from './camera.js';
-import { createCubeGroup, rotateCube } from './cubeGroup.js';
+import { createCubeGroup, rotateCube, updateBreaks } from './cubeGroup.js';
 import { initInput } from './input.js';
 import { initTextTraces, updateTextTraces } from './textTrace.js';
+import { initAudienceInput } from './audienceInput.js';
 
 // 背景图轮播：预加载 + 硬切
 const BG_IMAGES = [
@@ -55,6 +56,9 @@ window.addEventListener('resize', () => onResize(camera, renderer));
 // 初始化文字痕迹系统
 initTextTraces();
 
+// 初始化 Audience 交互系统
+initAudienceInput(cubeGroup);
+
 // 动画主循环
 let lastTime = performance.now();
 
@@ -68,6 +72,7 @@ function animate() {
   TWEEN.update();
   rotateCube(cubeGroup);
   updateZoom(camera);
+  updateBreaks(now);
   updateTextTraces(cubeGroup, now, delta);
 
   renderer.render(scene, camera);

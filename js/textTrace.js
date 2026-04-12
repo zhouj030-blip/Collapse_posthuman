@@ -3,6 +3,7 @@
  * 在长方体六个内壁上动态生成文字，带各种"不完美"效果
  */
 import * as THREE from 'three';
+import { addEdgeBreaks } from './cubeGroup.js';
 
 // ─── 文字列表 ───
 const TEXTS = [
@@ -42,6 +43,15 @@ const COLOR_POOL = [
   'rgba(40, 40, 40, 0.70)',
 ];
 
+// ─── 永久痕迹颜色池（红/黄/绿/紫/蓝） ───
+const PERMANENT_COLOR_POOL = [
+  'rgba(220, 40, 40, 0.92)',
+  'rgba(230, 190, 30, 0.92)',
+  'rgba(40, 180, 60, 0.92)',
+  'rgba(160, 50, 210, 0.92)',
+  'rgba(40, 100, 240, 0.92)',
+];
+
 // ─── 六个内壁定义（本地坐标，Box = 1×1.55×1） ───
 const FACES = [
   { name: 'front',  pos: [0, 0, 0.499],  rot: [0, Math.PI, 0],       w: 1, h: 1.55 },
@@ -54,8 +64,8 @@ const FACES = [
 
 // ─── 常量 ───
 const SPAWN_MIN = 500;
-const SPAWN_MAX = 3000;
-const CLEAR_INTERVAL = 120000; // 每 120 秒清理一次
+const SPAWN_MAX = 1500;
+const CLEAR_INTERVAL = 90000; // 每 90 秒清理一次
 const PERMANENT_RATIO = 0.05; // 每次清理保留 5%
 const MAX_LOCAL_FONT_SIZE = 0.086; // 再缩小 1/3
 const MIN_LOCAL_FONT_SIZE = 0.05;
@@ -70,6 +80,7 @@ let nextClearTime = 0;
 let fontsReady = false;
 let fixPending = false; // 是否正在播放 FIX 全屏动画
 let fixEndTime = 0;
+let fixCount = 0;
 let noiseInterval = null;
 
 // ─── 公共接口 ───
@@ -133,9 +144,17 @@ let blockInterval = null;
 
 function triggerFix(cubeGroup, time) {
   periodicClear(cubeGroup);
+  fixCount++;
+  updateFixCounter();
+  addEdgeBreaks(cubeGroup);
   showFixOverlay();
   fixPending = true;
   fixEndTime = time + FIX_DURATION;
+}
+
+function updateFixCounter() {
+  const el = document.getElementById('fix-counter');
+  if (el) el.textContent = String(fixCount).padStart(3, '0');
 }
 
 function showFixOverlay() {
@@ -219,11 +238,14 @@ function periodicClear(cubeGroup) {
   const nonPermanent = traces.filter(t => !t.permanent);
   if (nonPermanent.length === 0) return;
 
-  // 随机选 5% 标记为永久
+  // 随机选 5% 标记为永久，并变色
   const keepCount = Math.max(1, Math.ceil(nonPermanent.length * PERMANENT_RATIO));
   const shuffled = nonPermanent.sort(() => Math.random() - 0.5);
   for (let i = 0; i < keepCount; i++) {
     shuffled[i].permanent = true;
+    const newColor = PERMANENT_COLOR_POOL[Math.floor(Math.random() * PERMANENT_COLOR_POOL.length)];
+    shuffled[i].color = newColor;
+    redrawCanvas(shuffled[i], shuffled[i].text);
   }
 
   // 删除剩余的非永久文字
@@ -569,6 +591,67 @@ function disposeTrace(trace, cubeGroup) {
   trace.texture.dispose();
   const idx = traces.indexOf(trace);
   if (idx !== -1) traces.splice(idx, 1);
+}
+
+// ─── 外部调用：将 audience 文字作为永久痕迹添加到长方体 ───
+
+export function spawnPermanentTrace(cubeGroup, customText) {
+  const time = performance.now();
+  const font = FONT_LIST[Math.floor(Math.random() * FONT_LIST.length)];
+  const localFontSize = randomRange(MIN_LOCAL_FONT_SIZE, MAX_LOCAL_FONT_SIZE);
+  const face = FACES[Math.floor(Math.random() * FACES.length)];
+  const color = PERMANENT_COLOR_POOL[Math.floor(Math.random() * PERMANENT_COLOR_POOL.length)];
+  const effects = pickEffects();
+
+  const pxSize = Math.round(localFontSize * CANVAS_PX_PER_UNIT);
+  const maxCanvasW = Math.round(face.w * 0.85 * CANVAS_PX_PER_UNIT);
+  const { canvas, ctx, texWidth, texHeight } = createTextCanvas(customText, font, pxSize, color, maxCanvasW);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+
+  const planeW = texWidth / CANVAS_PX_PER_UNIT;
+  const planeH = texHeight / CANVAS_PX_PER_UNIT;
+
+  const geometry = new THREE.PlaneGeometry(planeW, planeH);
+  const material = new THREE.MeshBasicMaterial({
+    map: texture,
+    transparent: true,
+    depthWrite: false,
+    side: THREE.FrontSide,
+    alphaTest: 0.01,
+  });
+
+  const mesh = new THREE.Mesh(geometry, material);
+  positionOnFace(mesh, face, planeW, planeH);
+  cubeGroup.add(mesh);
+
+  const trace = {
+    mesh,
+    texture,
+    canvas,
+    ctx,
+    text: customText,
+    font,
+    fontSize: pxSize,
+    color,
+    face,
+    effects,
+    maxCanvasW,
+    createdAt: time,
+    permanent: true,
+    baseOpacity: 0.85,
+    basePos: mesh.position.clone(),
+    charIndex: 0,
+  };
+
+  for (const effect of effects) {
+    if (effect.init) effect.init(trace, time);
+  }
+
+  traces.push(trace);
 }
 
 // ─── 工具 ───

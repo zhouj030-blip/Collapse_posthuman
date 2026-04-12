@@ -27,9 +27,17 @@
   <!-- 中层：Three.js 透明 Canvas -->
   <div id="canvas-container"></div>
 
+  <!-- Audience 文字弹出层 -->
+  <div id="audience-text-layer"></div>
+
   <!-- 顶层：UI 预留（文字输入等） -->
   <div id="ui-layer">
+    <div id="fix-counter">000</div>
     <div id="fix-label">FIX</div>
+    <div id="audience-input-area">
+      <textarea id="audience-input" placeholder="How are you feeling now?" autocomplete="off" rows="1"></textarea>
+      <div id="enter-label">ENTER</div>
+    </div>
   </div>
 
   <!-- FIX 全屏覆盖层 -->
