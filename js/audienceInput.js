@@ -66,6 +66,21 @@ export function initAudienceInput(cubeGroup) {
   });
 }
 
+/**
+ * Reset：清除所有正在显示的 Audience 弹出文字
+ * 不转入永久痕迹，直接抹掉
+ */
+export function clearActiveAudienceTexts() {
+  for (const entry of activeTexts) {
+    entry.removed = true;
+    if (entry.flickerTimeout) clearTimeout(entry.flickerTimeout);
+    if (entry.jitterTimeout) clearTimeout(entry.jitterTimeout);
+    if (entry.barGlitchTimeout) clearTimeout(entry.barGlitchTimeout);
+    entry.element.remove();
+  }
+  activeTexts.length = 0;
+}
+
 // ─── 内部函数 ───
 
 function submitInput(input) {

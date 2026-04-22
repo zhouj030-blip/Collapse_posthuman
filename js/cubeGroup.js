@@ -125,6 +125,26 @@ export function updateBreaks(time) {
 }
 
 /**
+ * Reset：清除所有边框断裂片段，恢复完整线框
+ */
+export function clearEdgeBreaks(group) {
+  for (const b of breakFragments) {
+    group.remove(b.mesh);
+    b.mesh.geometry.dispose();
+    b.mesh.material.dispose();
+  }
+  breakFragments.length = 0;
+}
+
+/**
+ * Reset：把 X/Z 倾斜归零（保留 Y 自转，避免朝向跳变）
+ */
+export function resetCubeTilt(group) {
+  group.rotation.x = 0;
+  group.rotation.z = 0;
+}
+
+/**
  * 仅 Y 轴匀速自转，速度为原来的 1/4
  * X/Z 轴允许微小倾斜，超过 10° 缓慢回正
  */

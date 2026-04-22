@@ -4,6 +4,7 @@
  */
 import * as THREE from 'three';
 import { addEdgeBreaks } from './cubeGroup.js';
+import { clearMouseTraces } from './mouseTrace.js';
 
 // ─── 文字列表 ───
 const TEXTS = [
@@ -132,6 +133,28 @@ export function clearTraces(cubeGroup) {
   periodicClear(cubeGroup);
 }
 
+/**
+ * 一键重置：清除所有非永久文字痕迹，FIX 计数归零，时间线重置
+ * 永久痕迹（permanent=true）保留
+ */
+export function resetTextTraces(cubeGroup) {
+  for (let i = traces.length - 1; i >= 0; i--) {
+    if (!traces[i].permanent) {
+      disposeTrace(traces[i], cubeGroup);
+    }
+  }
+  fixCount = 0;
+  updateFixCounter();
+  const now = performance.now();
+  nextSpawnTime = now + randomRange(SPAWN_MIN, SPAWN_MAX);
+  nextClearTime = now + CLEAR_INTERVAL;
+  // 若正在播放 FIX 全屏动画，立即结束
+  if (fixPending) {
+    hideFixOverlay();
+    fixPending = false;
+  }
+}
+
 // ─── FIX 全屏动画 ───
 
 const FIX_FONTS = ['Impact', 'Corbel', 'Courier New', 'Bernard MT Condensed'];
@@ -144,12 +167,17 @@ let blockInterval = null;
 
 function triggerFix(cubeGroup, time) {
   periodicClear(cubeGroup);
+  clearMouseTraces(cubeGroup);
   fixCount++;
   updateFixCounter();
   addEdgeBreaks(cubeGroup);
   showFixOverlay();
   fixPending = true;
   fixEndTime = time + FIX_DURATION;
+}
+
+export function isFixActive() {
+  return fixPending;
 }
 
 function updateFixCounter() {

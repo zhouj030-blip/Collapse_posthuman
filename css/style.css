@@ -137,6 +137,28 @@ html, body {
   pointer-events: auto;
 }
 
+#reset-btn {
+  position: absolute;
+  right: 5%;
+  /* 底部与 #fix-counter (top 5% + font-size 3.4rem × line-height 1.2 × scaleY 1.35) 底部对齐 */
+  top: calc(5% + 3.65rem);
+  width: 1.2rem;
+  height: 1.2rem;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#reset-btn:hover {
+  color: rgba(0, 0, 0, 0.7);
+}
+
 #audience-input {
   width: 240px;
   height: 90px;

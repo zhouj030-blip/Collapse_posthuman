@@ -4,10 +4,11 @@
 import * as TWEEN from '@tweenjs/tween.js';
 import { initScene } from './scene.js';
 import { initCamera, setupZoom, updateZoom, onResize } from './camera.js';
-import { createCubeGroup, rotateCube, updateBreaks } from './cubeGroup.js';
+import { createCubeGroup, rotateCube, updateBreaks, clearEdgeBreaks, resetCubeTilt } from './cubeGroup.js';
 import { initInput } from './input.js';
-import { initTextTraces, updateTextTraces } from './textTrace.js';
-import { initAudienceInput } from './audienceInput.js';
+import { initTextTraces, updateTextTraces, resetTextTraces } from './textTrace.js';
+import { initAudienceInput, clearActiveAudienceTexts } from './audienceInput.js';
+import { updateMouseTraces, resetMouseTraces } from './mouseTrace.js';
 
 // 背景图轮播：预加载 + 硬切
 const BG_IMAGES = [
@@ -59,6 +60,18 @@ initTextTraces();
 // 初始化 Audience 交互系统
 initAudienceInput(cubeGroup);
 
+// Reset 按钮：演示用一键回到初始干净状态
+const resetBtn = document.getElementById('reset-btn');
+if (resetBtn) {
+  resetBtn.addEventListener('click', () => {
+    resetTextTraces(cubeGroup);
+    resetMouseTraces(cubeGroup);
+    clearEdgeBreaks(cubeGroup);
+    clearActiveAudienceTexts();
+    resetCubeTilt(cubeGroup);
+  });
+}
+
 // 动画主循环
 let lastTime = performance.now();
 
@@ -74,6 +87,7 @@ function animate() {
   updateZoom(camera);
   updateBreaks(now);
   updateTextTraces(cubeGroup, now, delta);
+  updateMouseTraces(now);
 
   renderer.render(scene, camera);
 }
